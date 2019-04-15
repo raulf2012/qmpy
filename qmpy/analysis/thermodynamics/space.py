@@ -8,10 +8,13 @@ import logging
 from django.db import transaction
 
 import qmpy
-from qmpy.utils import *
-import phase
-from reaction import Reaction
-from equilibrium import Equilibrium
+# from qmpy.utils import *
+# import phase
+
+# from reaction import Reaction
+from qmpy.analysis.thermodynamics.reaction import Reaction
+# from equilibrium import Equilibrium
+from qmpy.analysis.thermodynamics.equilibrium import Equilibrium
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +30,7 @@ class Heap(dict):
     def add(self, seq):
         if len(seq) == 1:
             self[seq[0]] = Heap()
-            return 
+            return
         seq = sorted(seq)
         e0 = seq[0]
         if e0 in self:
@@ -124,7 +127,7 @@ class PhaseSpace(object):
         bounds = parse_space(bounds)
         if bounds is None:
             self.bounds = None
-            return 
+            return
 
         elements = sorted(set.union(*[ set(b.keys()) for b in bounds ]))
         basis = []
@@ -169,7 +172,7 @@ class PhaseSpace(object):
         fit = kwargs.get('fit', 'standard')
         total = kwargs.get('total', (fit is None))
         if target == 'oqmd':
-            self.data.load_oqmd(self.space, fit=fit, 
+            self.data.load_oqmd(self.space, fit=fit,
                     stable=stable, total=total)
         elif 'legacy' in target:
             self.data.load_library('legacy.dat')
@@ -229,7 +232,7 @@ class PhaseSpace(object):
         return (p.energy - dE)/N
 
     def phase_comp(self, p):
-        comp = dict((k,v) for k,v in p.comp.items() 
+        comp = dict((k,v) for k,v in p.comp.items()
                  if k in self.bound_elements)
         return unit_comp(comp)
 
@@ -254,9 +257,9 @@ class PhaseSpace(object):
 
     def clear_all(self):
         """
-        Clears input data and analyzed results. 
+        Clears input data and analyzed results.
         Same as:
-        >>> PhaseData.clear_data() 
+        >>> PhaseData.clear_data()
         >>> PhaseData.clear_analysis()
         """
         self.clear_data()
@@ -457,7 +460,7 @@ class PhaseSpace(object):
         if self._spaces:
             return self._spaces
         spaces = set([ frozenset(p.space) for p in self.phase_dict.values() ])
-        spaces = [ space for space in spaces if not 
+        spaces = [ space for space in spaces if not
                 any([ space < space2 for space2 in spaces ])]
         self._spaces = list(map(list, spaces))
         return self._spaces
@@ -523,7 +526,7 @@ class PhaseSpace(object):
             for p1, p2 in subspace.tie_lines:
                 i1, i2 = sorted([indict[p1], indict[p2]])
                 adjacency[i1, i2] = 1
-        tl = set( (phases[i], phases[j]) for i, j in 
+        tl = set( (phases[i], phases[j]) for i, j in
                 zip(*np.nonzero(adjacency)) )
         self._tie_lines = tl
         return tl
@@ -679,7 +682,7 @@ class PhaseSpace(object):
 
     def in_space(self, composition):
         """
-        Returns True, if the composition is in the right elemental-space 
+        Returns True, if the composition is in the right elemental-space
         for this PhaseSpace.
 
         Examples::
@@ -833,7 +836,7 @@ class PhaseSpace(object):
 
         uhull = set()
         for facet in conv_hull.simplices:
-            face = frozenset([ faces[i] for i in facet 
+            face = frozenset([ faces[i] for i in facet
                 if i < len(faces) ])
             uhull.add(face)
 
@@ -847,7 +850,7 @@ class PhaseSpace(object):
         phases from out of the space.
 
         Examples::
-            
+
             >>> space = PhaseSpace('FeSi2-Li')
             >>> space.get_hull_points()
             [<Phase FeSi2 (23408): -0.45110217625>,
@@ -909,7 +912,7 @@ class PhaseSpace(object):
 
         if isinstance(composition, basestring):
             composition = parse_comp(composition)
-            
+
         if not phases:
             phases = [ p for p in self.phase_dict.values() if p.use ]
 
@@ -961,7 +964,7 @@ class PhaseSpace(object):
 
         phase_comp = dict([ (p, phase_vars[p].varValue)
             for p in phases if phase_vars[p].varValue > 1e-5])
-        
+
         energy = sum( p.energy*amt for p, amt in phase_comp.items() )
         energy -= sum([ a*composition.get(e, 0) for e,a in mus.items()])
         return energy, phase_comp
@@ -1011,7 +1014,7 @@ class PhaseSpace(object):
     def compute_stability(self, p):
         """
         Compute the energy difference between the formation energy of a Phase,
-        and the energy of the convex hull in the absence of that phase. 
+        and the energy of the convex hull in the absence of that phase.
         """
         #if self.phase_dict[p.name] != p:
         #    stable = self.phase_dict[p.name]
@@ -1043,7 +1046,7 @@ class PhaseSpace(object):
                 List of Phases. If None, uses every Phase in PhaseSpace.phases
 
             save:
-                If True, save the value for stability to the database. 
+                If True, save the value for stability to the database.
 
             new_only:
                 If True, only compute the stability for Phases which did not
@@ -1116,7 +1119,7 @@ class PhaseSpace(object):
     def find_reaction_mus(self, element=None):
         """
         Find the chemical potentials of a specified element at which reactions
-        occur. 
+        occur.
 
         Examples::
 
@@ -1205,7 +1208,7 @@ class PhaseSpace(object):
         Plot of phase volume vs formation energy.
 
         Examples::
-            
+
             >>> s = PhaseSpace('Fe2O3')
             >>> r = s.make_as_unary()
             >>> r.plot_in_matplotlib()
@@ -1238,11 +1241,11 @@ class PhaseSpace(object):
         self.renderer.options['tooltip'] = True
 
     def make_1d_vs_chempot(self, **kwargs):
-        """ 
+        """
         Plot of phase stability vs chemical potential for a single composition.
 
         Examples::
-            
+
             >>> s = PhaseSpace('Fe', mus={'O':[0,-4]})
             >>> r = s.make_vs_chempot()
             >>> r.plot_in_matplotlib()
@@ -1260,7 +1263,7 @@ class PhaseSpace(object):
         compositions.
 
         Examples::
-            
+
             >>> s = PhaseSpace('Fe-Li', mus={'O':[0,-4]})
             >>> r = s.make_vs_chempot()
             >>> r.plot_in_matplotlib()
@@ -1326,14 +1329,14 @@ class PhaseSpace(object):
         self.renderer.add(pc)
 
         self.renderer.options['grid']['hoverable'] = True
-            
+
     def make_as_binary(self, **kwargs):
         """
         Construct a binary phase diagram (convex hull) and write it to a
         :mod:`~qmpy.Renderer`.
 
         Examples::
-            
+
             >>> s = PhaseSpace('Fe-P')
             >>> r = s.make_as_binary()
             >>> r.plot_in_matplotlib()
@@ -1393,7 +1396,7 @@ class PhaseSpace(object):
         :mod:`~qmpy.Renderer`.
 
         Examples::
-            
+
             >>> s = PhaseSpace('Fe-Li-O-P')
             >>> r = s.make_as_quaternary()
             >>> r.plot_in_matplotlib()
@@ -1433,7 +1436,7 @@ class PhaseSpace(object):
             fill=True,
             color='green'))
 
-        self.renderer.options['grid']['hoverable'] = True, 
+        self.renderer.options['grid']['hoverable'] = True,
         self.renderer.options['grid']['borderWidth'] = 0
         self.renderer.options['grid']['margin'] = 4
         self.renderer.options['grid']['show'] = False
@@ -1445,7 +1448,7 @@ class PhaseSpace(object):
         :mod:`~qmpy.Renderer`.
 
         Examples::
-            
+
             >>> s = PhaseSpace('Fe-Li-O-P')
             >>> r = s.make_as_quaternary()
             >>> r.plot_in_matplotlib()
@@ -1480,7 +1483,7 @@ class PhaseSpace(object):
                 self.renderer.add(Text(pt, p.name))
         self.renderer.add(PointCollection(points, color='green'))
 
-        self.renderer.options['grid']['hoverable'] = True, 
+        self.renderer.options['grid']['hoverable'] = True,
         self.renderer.options['grid']['borderWidth'] = 0
         self.renderer.options['grid']['show'] = False
         self.renderer.options['tooltip'] = True
@@ -1554,7 +1557,7 @@ class PhaseSpace(object):
                     sum([ p.fraction(var)[celt]*rvars[p] for p in phases ]),\
                     'identical %s composition on both sides' % celt
         prob += sum([ rvars[p] for p in phases ]) == 1
-        
+
         if pulp.GUROBI().available():
             prob.solve(pulp.GUROBI(msg=False))
         elif pulp.COIN_CMD().available():
@@ -1590,13 +1593,13 @@ class PhaseSpace(object):
             reacts, prods, delta_var = self.get_reaction(var, facet=facet)
             if vphase in facet:
                 yield Reaction(
-                    products={vphase:sum(vphase.comp.values())}, 
+                    products={vphase:sum(vphase.comp.values())},
                     reactants={}, delta_var=1.0,
                     electrons=electrons, variable=var)
                 continue
             elif delta_var < 1e-6:
                 pass
-            yield Reaction(products=prods, reactants=reacts, 
+            yield Reaction(products=prods, reactants=reacts,
                 delta_var=delta_var,
                 variable=var, electrons=electrons)
 
@@ -1641,7 +1644,7 @@ class PhaseSpace(object):
             voltage = reaction.delta_h/reaction.delta_var/electrons
             x1 = reaction.r_var_comp
             x2 = reaction.p_var_comp
-            points |= set([(x1, voltage), 
+            points |= set([(x1, voltage),
                     (x2, voltage)])
 
         points = sorted( points, key=lambda x: x[0] )
@@ -1659,14 +1662,14 @@ class PhaseSpace(object):
                 ax2.plot([points[i][0], points[i+1][0]],
                         [points[i][1], points[i+1][1]], 'k')
 
-            ax2.plot([points[-2][0], points[-2][0]], 
+            ax2.plot([points[-2][0], points[-2][0]],
                     [points[-2][1], points[-1][1]], 'k')
-            ax2.plot([points[-2][0], max_x], 
+            ax2.plot([points[-2][0], max_x],
                     [points[-1][1], points[-1][1]], 'k')
         else:
             ax2.plot([0, max_x], [points[0][1], points[0][1]], 'k')
-        
-        plt.xlabel('$\\rm{x}$ $\\rm{in}$ $\\rm{(%s)_{x}(%s)_{1-x}}$' % ( 
+
+        plt.xlabel('$\\rm{x}$ $\\rm{in}$ $\\rm{(%s)_{x}(%s)_{1-x}}$' % (
            format_latex(var),
             base.latex))
         plt.ylabel('$\\rm{Voltage}$ $\\rm{[V]}$')
@@ -1677,6 +1680,6 @@ class PhaseSpace(object):
         #    plt.show()
         #else:
         #    plt.savefig('%s-%s.eps' % (save, vname),
-        #            bbox_inches='tight', 
+        #            bbox_inches='tight',
         #            transparent=True,
-        #            pad_inches=0) 
+        #            pad_inches=0)

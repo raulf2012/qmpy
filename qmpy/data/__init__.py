@@ -1,6 +1,8 @@
 import yaml
 import os.path
 
+print("lksjfisdifjisdjifsd | TEMP | 190415")
+
 location = os.path.dirname(__file__)
 
 data = open(location+'/elements/groups.yml').read()
@@ -11,7 +13,7 @@ elements = yaml.load(data)
 
 data = open(location+'/elements/chemical_potentials.yml').read()
 chem_pots = yaml.load(data)
-
-def save_chem_pots(chem_pots):
-    file = open(location+'/elements/chemical_potentials.yml', 'w')
-    file.write(yaml.dump(chem_pots, default_flow_style=False))
+#
+# def save_chem_pots(chem_pots):
+#     file = open(location+'/elements/chemical_potentials.yml', 'w')
+#     file.write(yaml.dump(chem_pots, default_flow_style=False))

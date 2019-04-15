@@ -5,13 +5,13 @@ import numpy.linalg
 import json
 import itertools
 from collections import defaultdict
-from utils import *
+# from utils import *
 import logging
 
 from scipy.spatial import ConvexHull
 
 import qmpy
-import phase
+# import phase
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class Reaction(object):
     methods
     attributes
     """
-    
+
     def __init__(self, products=None, reactants=None, delta_var=None,
             variable=None, electrons=1.0):
         ### write blanks
@@ -71,7 +71,7 @@ class Reaction(object):
 
     @property
     def p_natoms(self):
-        return sum( sum(p.unit_comp.values())*amt for p, amt in 
+        return sum( sum(p.unit_comp.values())*amt for p, amt in
                 self._products.items())
 
     @property
@@ -124,7 +124,7 @@ class Reaction(object):
 
     @property
     def r_natoms(self):
-        return sum( sum(p.unit_comp.values())*amt for p, amt in 
+        return sum( sum(p.unit_comp.values())*amt for p, amt in
                 self._reactants.items())
 
     @property
@@ -139,26 +139,26 @@ class Reaction(object):
 
     @property
     def product_string(self):
-        return ' + '.join( '%s %s' % 
-                (amt/sum(phase.nom_comp.values())/self.base, phase.name) 
+        return ' + '.join( '%s %s' %
+                (amt/sum(phase.nom_comp.values())/self.base, phase.name)
                 for phase, amt in self._products.items() )
 
     @property
     def reactant_string(self):
         return ' + '.join( '%s %s' %
-                (amt/sum(phase.nom_comp.values())/self.base, phase.name) 
+                (amt/sum(phase.nom_comp.values())/self.base, phase.name)
                 for phase, amt in self._reactants.items() )
 
     @property
     def product_latex(self):
         return ' + '.join( '%s %s' %
-                (amt/sum(phase.nom_comp.values())/self.base, phase.latex) 
+                (amt/sum(phase.nom_comp.values())/self.base, phase.latex)
                 for phase, amt in self._products.items() )
 
     @property
     def reactant_latex(self):
         return ' + '.join( '%s %s' %
-                (amt/sum(phase.nom_comp.values())/self.base, phase.latex) 
+                (amt/sum(phase.nom_comp.values())/self.base, phase.latex)
                 for phase, amt in self._reactants.items() )
 
     @property
@@ -176,28 +176,28 @@ class Reaction(object):
     def react_mass(self):
         if not self._reactants:
             return 0
-        return sum( amt*phase.mass for phase, amt in 
+        return sum( amt*phase.mass for phase, amt in
                 self._reactants.items() ) / sum(self._reactants.values())
 
     @property
     def prod_mass(self):
         if not self._products:
             return 0
-        return sum( amt*phase.mass for phase, amt in 
+        return sum( amt*phase.mass for phase, amt in
                 self._products.items() ) / sum(self._products.values())
 
     @property
     def react_vol(self):
         if not self._reactants:
             return 0
-        return sum( amt*phase.volume for phase, amt in 
+        return sum( amt*phase.volume for phase, amt in
                 self._reactants.items() ) / sum(self._reactants.values())
 
     @property
     def prod_vol(self):
         if not self._products:
             return 0
-        return sum( amt*phase.volume for phase, amt in 
+        return sum( amt*phase.volume for phase, amt in
                 self._products.items() ) / sum(self._products.values())
 
     @property
@@ -211,7 +211,7 @@ class Reaction(object):
         if self._delta_var is None:
             self._delta_var = self.p_var_comp - self.r_var_comp
             if self._delta_var == 0:
-                self._delta_var = 1 
+                self._delta_var = 1
         return self._delta_var
 
     @property
