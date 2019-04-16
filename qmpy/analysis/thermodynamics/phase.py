@@ -35,6 +35,8 @@ class PhaseData(object):
     and it is undesirable to access the database for every space you want to
     consider.
     """
+
+    #| - PhaseData
     def __init__(self):
         self.clear()
 
@@ -91,20 +93,23 @@ class PhaseData(object):
         for elt in phase.comp:
 
             #TEMP
-            print("TEMP TEMP | RF | 190415 | jdfdsijwsd798sdf")
+            # print("TEMP TEMP | RF | 190415 | jdfdsijwsd798sdf")
+            #
+            # print("elt: ", elt)
+            # print("self.phases_by_elt: ", self.phases_by_elt)
+            #
+            # print(self.phases_by_elt[elt])
+            # print(type(self.phases_by_elt[elt]))
+            #
+            # print("---------")
+            # print(phase)
+            # print("TEMP TEMP | RF | 190415 | jdfdsijwsd798sdf")
 
-            print("elt: ", elt)
-            print("self.phases_by_elt: ", self.phases_by_elt)
+            self.phases_by_elt[elt] = phase
+            # self.phases_by_elt[elt].add(phase)
 
-            print(self.phases_by_elt[elt])
-            print(type(self.phases_by_elt[elt]))
-
-            print("---------")
-            print(phase)
-            print("TEMP TEMP | RF | 190415 | jdfdsijwsd798sdf")
-
-            self.phases_by_elt[elt].add(phase)
-        self.phases_by_dim[len(phase.comp)].add(phase)
+        self.phases_by_dim[len(phase.comp)] = phase
+        # self.phases_by_dim[len(phase.comp)].add(phase)
 
         self.space |= set(phase.comp.keys())
 
@@ -329,6 +334,17 @@ class PhaseData(object):
         if not space:
             return self
         ##dim = len(space)
+
+        # TEMP
+        # print("lkjsdifisdfsdifjisdjdfs | ksj98")
+        # print("type(self.phases): ", type(self.phases))
+        # print("self.phases: ", self.phases)
+        # print("lkjsdifisdfsdifjisdjdfs | ksj98")
+        # file_path = "/media/sf_github/PROJ_active_mat_discovery/user_dirs/raul_flores_dir/camd_test/agent_random_v1/phases_data_tmp.pickle"
+        # import pickle
+        # with open(file_path, "wb") as fle:
+        #     pickle.dump(self.phases, fle)
+
         phases = set(self.phases)
         others = set(self.phases_by_elt.keys()) - set(space)
         for elt in others:
@@ -336,6 +352,8 @@ class PhaseData(object):
         pd = PhaseData()
         pd.phases = phases
         return pd
+    #__|
+
 
 class Phase(object):
     """
@@ -355,6 +373,8 @@ class Phase(object):
         True
 
     """
+
+    #| - Phase
 
     id = None
     use = True
@@ -439,6 +459,22 @@ class Phase(object):
            if abs(self.unit_comp[key]-other.unit_comp[key]) > 1e-6:
                 return False
         return True
+
+
+    def __hash__(self):
+        """Overrides the default implementation"""
+
+        dict_tmp = {}
+        for key in self.comp:
+            dict_tmp[key] = self.unit_comp[key]
+
+        dict_tmp["energy"] = self.energy
+
+        return hash(tuple(
+            sorted(dict_tmp.items())
+            # sorted(self.__dict__.items())
+            ))
+
 
     @property
     def label(self):
@@ -664,3 +700,4 @@ class Phase(object):
         residual['var'] = (tot - sum(residual.values()))
         residual['var'] /= float(sum(comp.values()))
         return residual
+    #__|

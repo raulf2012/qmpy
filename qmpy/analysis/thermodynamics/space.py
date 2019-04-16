@@ -5,11 +5,22 @@ from scipy.spatial import ConvexHull
 import matplotlib.pylab as plt
 import logging
 
+import numpy as np
+
 from django.db import transaction
 
 import qmpy
 # from qmpy.utils import *
 # import phase
+
+
+from qmpy.utils.strings import (
+    parse_space,
+    parse_comp,
+    unit_comp,
+    reduce_comp,
+    format_comp,
+    )
 
 # from reaction import Reaction
 from qmpy.analysis.thermodynamics.reaction import Reaction
@@ -153,7 +164,7 @@ class PhaseSpace(object):
         self.mus = {}
         if mus is None:
             return
-        elif isinstance(mus, basestring):
+        elif isinstance(mus, str):
             mus = mus.replace(',', ' ')
             for mu in mus.split():
                 self.mus.update(parse_mu(mu))
@@ -395,7 +406,7 @@ class PhaseSpace(object):
         """
         if isinstance(composition, phase.Phase):
             composition = composition.comp
-        elif isinstance(composition, basestring):
+        elif isinstance(composition, str):
             composition = parse_comp(composition)
 
         composition = defaultdict(float, composition)
@@ -694,13 +705,28 @@ class PhaseSpace(object):
             True
 
         """
+        from qmpy.analysis.thermodynamics.phase import Phase  # import phase
+
+
+        # print(Phase)
+        # # TEMP
+        # print("type(composition): ", type(composition))
+        # print("composition: ", composition)
+        # print(isinstance(composition, Phase))
+        #
+        # print(type(composition))
+        # print(type(Phase))
+
 
         if self.bounds is None:
             return True
-        if isinstance(composition, phase.Phase):
+
+        if isinstance(composition, Phase):
             composition = composition.comp
-        elif isinstance(composition, basestring):
+            # print("11111 | jsfs98durr9324jf98")
+        elif isinstance(composition, str):
             composition = parse_comp(composition)
+            # print("2222 | jsfs98durr9324jf98")
 
         if set(composition.keys()) <= self.space:
             return True
@@ -724,7 +750,7 @@ class PhaseSpace(object):
             return True
         if isinstance(composition, phase.Phase):
             composition = composition.unit_comp
-        elif isinstance(composition, basestring):
+        elif isinstance(composition, str):
             composition = parse_comp(composition)
 
         if not self.in_space(composition):
@@ -910,7 +936,7 @@ class PhaseSpace(object):
         if not composition:
             return 0.0, {}
 
-        if isinstance(composition, basestring):
+        if isinstance(composition, str):
             composition = parse_comp(composition)
 
         if not phases:
@@ -1538,7 +1564,7 @@ class PhaseSpace(object):
 
         """
 
-        if isinstance(var, basestring):
+        if isinstance(var, str):
             var = parse_comp(var)
 
         if facet:
@@ -1584,7 +1610,7 @@ class PhaseSpace(object):
             >>> space.get_reactions('Li', electrons=1)
 
         """
-        if isinstance(var, basestring):
+        if isinstance(var, str):
             var = parse_comp(var)
         vname = format_comp(reduce_comp(var))
         vphase = self.phase_dict[vname]
@@ -1608,7 +1634,7 @@ class PhaseSpace(object):
         Plot the convex hull along the reaction path, as well as the voltage
         profile.
         """
-        if isinstance(var, basestring):
+        if isinstance(var, str):
             var = parse_comp(var)
         vname = format_comp(var)
 
