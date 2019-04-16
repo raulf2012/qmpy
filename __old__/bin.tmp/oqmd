@@ -25,7 +25,7 @@ about database entries, do thermodynamic analyisis or request calculations.
             help='''What do you want to do?
 
 Valid options:
-    
+
     add_host
     start_host
     stop_host
@@ -35,7 +35,7 @@ Valid options:
     utilization
     progress
     failed
-    
+
     describe_database
 
     add_structure
@@ -47,7 +47,7 @@ Valid options:
     parser.add_argument('--formula','-F',
             nargs='*', default='',
             help='''A representation of a composition or compositions. Used
-when the task requires a composition. 
+when the task requires a composition.
 Examples:
     Fe2O3 -> {'Fe':2, 'O':3}
     FeO -> {'Fe':1, 'O':1}
@@ -84,7 +84,7 @@ Examples:
             print 'Model: %s' % model.__name__
             for field in model._meta.fields:
                 print '   -', field.name
-            print 
+            print
 
     #======================================================================#
     if runner.task[0] == 'add_structure':
@@ -189,13 +189,13 @@ Examples:
             projects = Project.objects.all().values_list('name', flat=True)
         else:
             projects = runner.task[1:]
-        
+
         for project in projects:
             print 'Project: %s' % project
             tasks = Task.objects.filter(project_set=project)
             rel = Calculation.objects.filter(converged=True,
                         label='relaxation', entry__task__project_set=project)
-            sta = Calculation.objects.filter(converged=True, 
+            sta = Calculation.objects.filter(converged=True,
                         label='static', entry__task__project_set=project)
 
             print '  %s tasks for this project' % tasks.count()
@@ -206,7 +206,7 @@ Examples:
             print '  Progress:'
             print '     - Relaxed: {0:.3f}%'.format(rel.count()/num*100)
             print '     - Completed: {0:.3f}%'.format(sta.count()/num*100)
-            print 
+            print
 
     #======================================================================#
     if runner.task[0] == 'failed':
@@ -251,7 +251,7 @@ Examples:
             else:
                 if calc.instructions:
                     calc.write()
-                    print 'Wrote calculation of %s' % struct 
+                    print 'Wrote calculation of %s' % struct
 
     #======================================================================#
     if runner.task[0] == 'kpoints':
@@ -267,7 +267,7 @@ Examples:
     if runner.task[0] == 'reaction':
         for formula in runner.formula:
             s = PhaseSpace(formula+'-'+runner.task[1])
-            for reaction in s.get_reactions(runner.task[1], 
+            for reaction in s.get_reactions(runner.task[1],
                     electrons=kwargs.get('electrons', 1.0)):
                 print reaction
 
@@ -276,7 +276,7 @@ Examples:
         for formula in runner.formula:
             print formula, '+', runner.task[1]
             s = PhaseSpace(formula+'-'+runner.task[1])
-            s.plot_reactions(runner.task[1], 
+            s.plot_reactions(runner.task[1],
                     electrons=kwargs.get('electrons', 1.0))
             plt.show()
 
@@ -300,11 +300,11 @@ Examples:
                 en, phases = space.gclp(formula)
                 keys = sorted( phases.keys(), key=lambda x: -phases[x])
                 print '   Hull formation energy: %.3f eV/atom' % en
-                print '   Hull phases:', 
+                print '   Hull phases:',
                 pstr = ''
                 for k in keys:
                     if phases[k] == 1:
-                        pstr += k.name 
+                        pstr += k.name
                     else:
                         pstr += '%s %s + ' % (phases[k], k.name)
                 pstr = pstr.rstrip('+ ')
@@ -429,8 +429,8 @@ Examples:
                 print '\n'.join([ p.name for p in phases])
 
             else:
-                result = query(type=runner.task[0], 
-                        formula=runner.formula, 
+                result = query(type=runner.task[0],
+                        formula=runner.formula,
                         search=runner.search,
                         columns=runner.task[1:])
                 print result
